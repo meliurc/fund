@@ -20,6 +20,13 @@ class FundSpider(Spider):
     cookies = {'st_pvi': ''}
     con_log = open('connection_104_log.txt', 'w')
 
+    def __init__(self, sdate, edate, table):
+        super(FundSpider, self).__init__()
+        """
+        :param sdate: string, YYYY-mm-dd
+        :param edate: string, YYYY-mm-dd
+        """
+
     def parse(self, response):
         href_list = response.xpath('//td[@class="td-align-left"]/a/@href').extract()
         for href in href_list:
@@ -35,8 +42,8 @@ class FundSpider(Spider):
             yield self.to_price_list(code)
 
     def to_price_list(self, code):
-        start_date = '2017-01-01'
-        end_date = (date.today() - timedelta(1)).strftime('%Y-%m-%d')
+        start_date = self.sdate
+        end_date = self.edate
         per = 366
         url = 'http://fund.eastmoney.com/f10/F10DataApi.aspx?type=lsjz&code={code}&page=1&per={per}&sdate={sdate}&edate={edate}'\
             .format(code=code, per=per, sdate=start_date, edate=end_date)
@@ -64,7 +71,7 @@ class FundSpider(Spider):
 
     def to_mysql(self, price_df):
         try:
-            price_df.to_sql('price_d', mysql_engine, if_exists='append', index=False)
+            price_df.to_sql(self.table, mysql_engine, if_exists='append', index=False)
             return 0
         except UnicodeEncodeError:
             price_df.to_csv('./unicode_error/unicode_error_{}.txt'.format(str(price_df['code'][0])))
