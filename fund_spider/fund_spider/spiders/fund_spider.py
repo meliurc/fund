@@ -26,6 +26,9 @@ class FundSpider(Spider):
         :param sdate: string, YYYY-mm-dd
         :param edate: string, YYYY-mm-dd
         """
+        self.sdate=sdate
+        self.edate=edate
+        self.table=table
 
     def parse(self, response):
         href_list = response.xpath('//td[@class="td-align-left"]/a/@href').extract()
